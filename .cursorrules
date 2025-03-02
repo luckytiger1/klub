@@ -1,0 +1,220 @@
+# Instructions
+
+During your interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again. 
+
+You should also use the `.cursorrules` file as a Scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the Scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the Scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+# Tools
+
+Note all the tools are in python3. So in the case you need to do batch processing, you can always consult the python files and write your own script.
+
+[NOTE TO CURSOR: Since no API key is configured, please ignore both the Screenshot Verification and LLM sections below.]
+[NOTE TO USER: If you have configured or plan to configure an API key in the future, simply delete these two notice lines to enable these features.]
+
+## Screenshot Verification
+
+The screenshot verification workflow allows you to capture screenshots of web pages and verify their appearance using LLMs. The following tools are available:
+
+1. Screenshot Capture:
+```bash
+venv/bin/python3 tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+```
+
+2. LLM Verification with Images:
+```bash
+venv/bin/python3 tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+```
+
+Example workflow:
+```python
+from screenshot_utils import take_screenshot_sync
+from llm_api import query_llm
+
+# Take a screenshot
+
+screenshot_path = take_screenshot_sync('https://example.com', 'screenshot.png')
+
+# Verify with LLM
+
+response = query_llm(
+    "What is the background color and title of this webpage?",
+    provider="openai",  # or "anthropic"
+    image_path=screenshot_path
+)
+print(response)
+```
+
+## LLM
+
+You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
+```
+venv/bin/python3 ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+```
+
+The LLM API supports multiple providers:
+- OpenAI (default, model: gpt-4o)
+- Azure OpenAI (model: configured via AZURE_OPENAI_MODEL_DEPLOYMENT in .env file, defaults to gpt-4o-ms)
+- DeepSeek (model: deepseek-chat)
+- Anthropic (model: claude-3-sonnet-20240229)
+- Gemini (model: gemini-pro)
+- Local LLM (model: Qwen/Qwen2.5-32B-Instruct-AWQ)
+
+But usually it's a better idea to check the content of the file and use the APIs in the `tools/llm_api.py` file to invoke the LLM if needed.
+
+## Web browser
+
+You could use the `tools/web_scraper.py` file to scrape the web.
+```bash
+venv/bin/python3 ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+```
+This will output the content of the web pages.
+
+## Search engine
+
+You could use the `tools/search_engine.py` file to search the web.
+```bash
+venv/bin/python3 ./tools/search_engine.py "your search keywords"
+```
+This will output the search results in the following format:
+```
+URL: https://example.com
+Title: This is the title of the search result
+Snippet: This is a snippet of the search result
+```
+If needed, you can further use the `web_scraper.py` file to scrape the web page content.
+
+# Lessons
+
+## User Specified Lessons
+
+- You have a python3 venv in ./venv. Use it.
+- Include info useful for debugging in the program output.
+- Read the file before you try to edit it.
+- Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
+
+## Cursor learned
+
+- For search results, ensure proper handling of different character encodings (UTF-8) for international queries
+- Add debug information to stderr while keeping the main output clean in stdout for better pipeline integration
+- When using seaborn styles in matplotlib, use 'seaborn-v0_8' instead of 'seaborn' as the style name due to recent seaborn version changes
+- Use 'gpt-4o' as the model name for OpenAI's GPT-4 with vision capabilities
+- When creating a Next.js project with TypeScript, ensure proper type definitions are installed for React and related libraries
+- Use the `@supabase/ssr` package instead of the deprecated `@supabase/auth-helpers-nextjs` package for implementing authentication with Supabase in Next.js
+- For Supabase authentication in Next.js, use `createServerClient` for middleware, `createBrowserClient` for client components, and `createServerActionClient` for server actions
+- When using third-party libraries without TypeScript definitions, create a declaration file (`.d.ts`) to define the module's types
+- When using the `react-qr-scanner` library, use the `facingMode` prop directly instead of the `constraints` property to specify camera settings, as the library's type definitions don't properly match the MediaTrackConstraints interface
+- To fix "Failed to execute 'getUserMedia' on 'MediaDevices': At least one of audio and video must be requested" errors with camera access, ensure you're using the correct camera configuration properties
+- When implementing authentication in a web app, use separate API clients for authenticated and public endpoints to ensure customer-facing features don't require authentication
+- For secure authentication with Supabase, use `supabase.auth.getUser()` instead of relying on session data from `supabase.auth.getSession()` as the latter may contain unverified data from cookies
+- Always implement proper error handling in authentication flows, checking for both error objects and null/undefined values in the response data
+- Remove debug console.log statements from production code, especially in middleware which runs on every request
+- When handling authentication state, ensure the loading state is properly set to false in all code paths, including error cases, to prevent the UI from being stuck in a loading state
+- Add try/catch blocks around authentication operations in middleware to prevent authentication errors from breaking the entire application
+- When using useState with complex objects that include nullable fields, provide explicit TypeScript types to avoid type errors
+- When handling QR code scanning, support multiple URL formats (both custom protocols like `klub://` and standard web URLs) to ensure compatibility with different QR code generation methods
+- When using URL search parameters with TypeScript, remember that `searchParams.get()` returns `string | null`, so proper null checking is required
+- For development purposes, support localhost URLs in QR code scanning to facilitate local testing without deploying to production
+- When using the `react-qr-scanner` library, place the `facingMode` setting inside the `constraints` object (`constraints={{ facingMode: 'environment' }}`) rather than as a direct prop to avoid React DOM warnings
+- To fix "Failed to execute 'getUserMedia'" errors with the `react-qr-scanner` library, set `constraints={true}` and use the `facingMode` prop separately to ensure proper camera access
+
+# Scratchpad
+
+## Klub App Development Plan
+
+### Task Description
+Building a Klub app with React.js and Next.js that includes:
+1. User-facing mobile app/web interface with QR scanning, bill viewing/splitting, payment processing
+2. Restaurant-facing dashboard with order management, payment tracking, analytics, and QR code generation
+
+### Implementation Plan
+[X] Set up Next.js project with TypeScript
+[X] Create project structure and component organization
+[X] Implement user-facing components:
+  [X] QR code scanner functionality
+  [X] Bill viewing and splitting interface
+  [ ] Payment processing screens
+  [ ] Receipt/confirmation screens
+  [X] User profile/history section
+[X] Implement restaurant-facing dashboard:
+  [ ] Order management system
+  [ ] Payment tracking
+  [X] Analytics and reporting
+  [ ] Table management
+  [X] QR code generation
+[ ] Set up authentication system
+[ ] Implement database models and API routes
+[X] Add styling and responsive design
+[ ] Testing and optimization
+
+### Progress Summary
+We've successfully set up the basic structure of a Next.js application for the Klub payment solution. The application includes:
+
+1. Main pages:
+   - Home page with links to user and restaurant sections
+   - User dashboard with access to QR scanning, bills, and profile
+   - Restaurant dashboard with access to orders, payments, analytics, tables, and QR code generation
+
+2. Key components:
+   - QR code scanner for users to scan restaurant codes
+   - Bill viewing interface with item selection and payment options
+   - QR code generator for restaurants to create table-specific codes
+   - Analytics dashboard with charts for sales, payment methods, and popular items
+
+3. Styling:
+   - Implemented with Tailwind CSS
+   - Custom color scheme and component styles
+   - Responsive design for mobile and desktop
+
+### Recent Authentication Fixes
+
+1. Fixed authentication loading state issues:
+   - Added proper error handling in AuthProvider's initAuth function
+   - Ensured loading state is set to false in all code paths
+   - Added try/catch blocks around auth state change listener
+   - Improved type safety with explicit TypeScript types
+
+2. Improved API error handling:
+   - Enhanced getCurrentUser and getSession methods with robust error handling
+   - Added checks for error objects and null/undefined values in response data
+   - Ensured consistent null returns on errors
+
+3. Enhanced middleware security:
+   - Added try/catch blocks around authentication operations
+   - Improved error handling for session and user data retrieval
+   - Ensured middleware doesn't disrupt application if authentication fails
+
+4. Added debugging information:
+   - Added detailed logging of authentication state
+   - Added debug information panel on home page in development mode
+   - Improved type safety with explicit TypeScript types
+
+5. Fixed customer-facing features requiring authentication:
+   - Updated the home page links to directly navigate to customer features without login
+   - Removed authentication requirement from the user dashboard page
+   - Updated the user profile page to work with or without authentication
+   - Added fallback to demo user data when not authenticated
+   - Ensured all customer-facing pages are accessible without login
+
+### Recent QR Scanner Fix
+
+1. Fixed QR scanner camera access issue:
+   - Updated the QR scanner component to use `constraints={true}` to enable video
+   - Used the `facingMode="environment"` prop separately to specify camera direction
+   - Fixed "Failed to execute 'getUserMedia'" error by ensuring video is properly requested
+   - Ensured proper camera access for scanning QR codes
+
+2. Fixed QR code format parsing:
+   - Updated the QR code parsing logic to support multiple URL formats
+   - Added support for web URL format: `https://klub.app/scan?restaurant={id}&table={number}`
+   - Maintained support for the original custom protocol: `klub://restaurant/{id}/table/{number}`
+   - Added support for localhost URLs: `http://localhost:3000/scan?restaurant={id}&table={number}` for development
+   - Improved error handling and debugging for QR code scanning
+   - Fixed TypeScript errors related to potentially null values from URL search parameters
+
+Next steps would include implementing the remaining components, setting up authentication, and connecting to a backend database. 
